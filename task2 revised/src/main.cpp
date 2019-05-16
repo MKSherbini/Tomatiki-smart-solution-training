@@ -2,7 +2,7 @@
 #include <fs.h>
 
 #define READING_TIME_INTERVAL_MS (100)
-#define TABLE_SIZE 10
+#define TABLE_SIZE 20
 #include <time.h> 
 
 char filename[] = "/test.txt";
@@ -24,8 +24,11 @@ uint32_t log_count=1;
 void delete_record(uint32_t offset);
 void reload_db();
 void print_record_I(uint32_t i);
+void add_record(uint32_t id,uint16_t sensorValue,uint32_t time);
+void add_record_I(uint32_t i,uint16_t sensorValue,uint32_t time);
 void update_record(uint32_t i,uint32_t id,uint32_t time,uint16_t sensorValue);
-uint32_t select_record(uint32_t id);
+uint32_t select_record_I_byID(uint32_t id);
+Record select_record(uint32_t i);
 
 void setup()
 {
@@ -34,66 +37,50 @@ void setup()
   SPIFFS.begin();
   Serial.println();
 
-  SPIFFS.remove(filename); 
-  SPIFFS.remove("test.txt"); 
-  myDataFile = SPIFFS.open(filename, "w+");
-  myDataFile.println(String(log_count++)+char(9)+String(1111)+char(9)+String(millis())); 
-  Serial.println("New Record Added "+String(log_count)+char(9)+String(1111)+char(9)+String(millis()));
-  myDataFile.println(String(log_count++)+char(9)+String(2222)+char(9)+String(millis())); 
-  Serial.println("New Record Added "+String(log_count)+char(9)+String(2222)+char(9)+String(millis()));
-  myDataFile.println(String(log_count++)+char(9)+String(2222)+char(9)+String(millis())); 
-  Serial.println("New Record Added "+String(log_count)+char(9)+String(2222)+char(9)+String(millis()));
-  myDataFile.close();  
+  wdt_disable();
 
- 
-  update_record(1,5,60,100);
-  update_record(select_record(5),4,60,100);
+  // for testing
 
-  reload_db();
-  print_record_I(0);
-  print_record_I(1);
-  print_record_I(2);
+  // SPIFFS.remove(filename); 
+  // SPIFFS.remove("test.txt"); 
+  // myDataFile = SPIFFS.open(filename, "w+");
+  // myDataFile.println(String(log_count++)+char(9)+String(1111)+char(9)+String(millis())); 
+  // Serial.println("New Record Added "+String(log_count)+char(9)+String(1111)+char(9)+String(millis()));
+  // myDataFile.println(String(log_count++)+char(9)+String(2222)+char(9)+String(millis())); 
+  // Serial.println("New Record Added "+String(log_count)+char(9)+String(2222)+char(9)+String(millis()));
+  // myDataFile.println(String(log_count++)+char(9)+String(2222)+char(9)+String(millis())); 
+  // Serial.println("New Record Added "+String(log_count)+char(9)+String(2222)+char(9)+String(millis()));
+  // myDataFile.close();  
+  // update_record(1,5,60,100);
+  // update_record(select_record_I_byID(5),4,60,100);
+  // myDataFile = SPIFFS.open(filename, "r");  
+  // Serial.println(myDataFile.size());  
+  // myDataFile.close();   
+  //  add_record_I(log_count++,analogRead(A0),millis()); 
+  //  myDataFile = SPIFFS.open(filename, "r");  
+  // Serial.println(myDataFile.size());  
+  // myDataFile.close();   
+  //reload_db();
+  // print_record_I(0);
+  // print_record_I(1);
+  // print_record_I(2);
+  //Serial.println(sensor_data[0].sensorValue);
 
-  myDataFile = SPIFFS.open(filename, "r+");              // Open the file again, this time for reading
-  if (!myDataFile) Serial.println("file open failed");  // Check for errors
-  Serial.println(myDataFile.size()); 
-  delete_record(4);
-  while (myDataFile.available()) {
-    Serial.write(myDataFile.read());                    // Read all the data from the file and display it
-  }
-  myDataFile.close();          
-
-//  myDataFile = SPIFFS.open(filename, "a+");
-//  myDataFile.close();  
-// Dir dir = SPIFFS.openDir("/");
-// while (dir.next()) {
-//     Serial.print(dir.fileName()+" ");
-//     if(dir.fileSize()) {
-//         File f = dir.openFile("r");
-//         Serial.println(f.size());
-//     }
-// }
+  Serial.println(select_record(0).sensorValue);
 }
 
 void loop()
 {
   // put your main code here, to run repeatedly:
-
-
-  // if (millis() - read_timer > READING_TIME_INTERVAL_MS)
-  // {
-  //   myDataFile = SPIFFS.open(filename, "a+");
-  //   if (!myDataFile)
-  //   {
-  //     Serial.println("file open failed"); // Check for errors
-  //     return;
-  //   }
-  //   sensorValue = analogRead(A0);
-  //   myDataFile.println(sensorValue); // Write some data to it
-  //   myDataFile.close();              // Close the file
-  //   read_timer = millis();
-  // }
+  // delay(10);
+  if (millis() - read_timer > READING_TIME_INTERVAL_MS)
+  {
+    add_record_I(log_count++,analogRead(A0),millis());  
+    if(log_count>TABLE_SIZE)log_count=1;
+    read_timer = millis();
+  }
 }
+
 void delete_record(uint32_t i){
   myDataFile = SPIFFS.open(filename, "r+");
   myDataFile.seek(i*RECORD_SIZE, SeekSet);
@@ -102,6 +89,19 @@ void delete_record(uint32_t i){
   myDataFile.seek(i*RECORD_SIZE, SeekSet);
   while(del--){myDataFile.write(0); }
   myDataFile.close();
+}
+void add_record_I(uint32_t i,uint16_t sensorValue,uint32_t time){
+  myDataFile = SPIFFS.open(filename, "a+");
+  myDataFile.seek(i*RECORD_SIZE, SeekSet);
+  myDataFile.println(String(i)+char(9)+String(sensorValue)+char(9)+String(time)); 
+  Serial.println("New Record Added "+String(i)+char(9)+String(sensorValue)+char(9)+String(time));
+  myDataFile.close();  
+}
+void add_record(uint32_t id,uint16_t sensorValue,uint32_t time){
+  myDataFile = SPIFFS.open(filename, "a+");
+  myDataFile.println(String(id)+char(9)+String(sensorValue)+char(9)+String(time)); 
+  Serial.println("New Record Added "+String(id)+char(9)+String(sensorValue)+char(9)+String(time));
+  myDataFile.close();  
 }
 void update_record(uint32_t i,uint32_t id,uint32_t time,uint16_t sensorValue){
   delete_record(i);
@@ -113,7 +113,7 @@ void update_record(uint32_t i,uint32_t id,uint32_t time,uint16_t sensorValue){
 }
 void reload_db(){
   myDataFile=SPIFFS.open(filename, "r");
-  log_count=0;
+  log_count=1;
   while (myDataFile.available()) { 
     uint32_t read_ahead = myDataFile.parseInt(); 
     if (read_ahead != 0) { 
@@ -128,8 +128,20 @@ void reload_db(){
 void print_record_I(uint32_t i){
    Serial.println("record "+String(sensor_data[i].id)+": "+char(9)+String(sensor_data[i].sensorValue)+char(9)+String(sensor_data[i].time));
 }
-
-uint32_t select_record(uint32_t id){
+Record select_record(uint32_t i){
+  myDataFile=SPIFFS.open(filename, "r");
+  myDataFile.seek(i*RECORD_SIZE, SeekSet);
+  Record r={0};
+  uint32_t read_ahead = myDataFile.parseInt(); 
+    if (read_ahead != 0) { 
+      r.id  = read_ahead;
+      r.sensorValue  = myDataFile.parseInt();
+      r.time = myDataFile.parseInt();
+    }
+  myDataFile.close();  
+  return r;
+}
+uint32_t select_record_I_byID(uint32_t id){
   myDataFile=SPIFFS.open(filename, "r");
   for (size_t i = 0; i < TABLE_SIZE; i++)
   {
