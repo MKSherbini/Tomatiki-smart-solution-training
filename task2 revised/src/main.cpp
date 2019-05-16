@@ -39,33 +39,6 @@ void setup()
 
   wdt_disable();
 
-  // for testing
-
-  // SPIFFS.remove(filename); 
-  // SPIFFS.remove("test.txt"); 
-  // myDataFile = SPIFFS.open(filename, "w+");
-  // myDataFile.println(String(log_count++)+char(9)+String(1111)+char(9)+String(millis())); 
-  // Serial.println("New Record Added "+String(log_count)+char(9)+String(1111)+char(9)+String(millis()));
-  // myDataFile.println(String(log_count++)+char(9)+String(2222)+char(9)+String(millis())); 
-  // Serial.println("New Record Added "+String(log_count)+char(9)+String(2222)+char(9)+String(millis()));
-  // myDataFile.println(String(log_count++)+char(9)+String(2222)+char(9)+String(millis())); 
-  // Serial.println("New Record Added "+String(log_count)+char(9)+String(2222)+char(9)+String(millis()));
-  // myDataFile.close();  
-  // update_record(1,5,60,100);
-  // update_record(select_record_I_byID(5),4,60,100);
-  // myDataFile = SPIFFS.open(filename, "r");  
-  // Serial.println(myDataFile.size());  
-  // myDataFile.close();   
-  //  add_record_I(log_count++,analogRead(A0),millis()); 
-  //  myDataFile = SPIFFS.open(filename, "r");  
-  // Serial.println(myDataFile.size());  
-  // myDataFile.close();   
-  //reload_db();
-  // print_record_I(0);
-  // print_record_I(1);
-  // print_record_I(2);
-  //Serial.println(sensor_data[0].sensorValue);
-
   Serial.println(select_record(0).sensorValue);
 }
 
