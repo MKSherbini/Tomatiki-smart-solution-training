@@ -8,7 +8,7 @@
 #include <time.h>
 
 char filename[] = "/test.txt";
-char config_filename[] = "/config.txt";
+char config_filename[] = "/config.txt"; // I could also use the first line in /test.txt as it's currently not used, but i wanted to keep this file in case I need to add other configs.
 u16 sensorValue;
 File myDataFile;
 unsigned long read_timer = 0;
@@ -20,7 +20,7 @@ typedef struct
   uint16_t sensorValue;
 } Record;
 
-#define RECORD_SIZE (28+1)
+#define RECORD_SIZE (28 + 1)
 
 Record sensor_data[TABLE_SIZE + 1];
 uint32_t log_count = 1;
@@ -44,45 +44,8 @@ void setup()
   SPIFFS.begin();
   Serial.println();
 
-  SPIFFS.remove(filename);
-  
-  add_record(1, 22, 33);
-  add_record(2, 22, 33);
-  add_record(3, 22, 33);
-
-   myDataFile = SPIFFS.open(filename, "r");              // Open the file again, this time for reading
-   if (!myDataFile) Serial.println("file open failed");  // Check for errors
-   while (myDataFile.available()) {
-     Serial.write(myDataFile.read());                    // Read all the data from the file and display it
-   }
-   myDataFile.close();   
-
-  // delete_record(1);
-  for (size_t i = 1; i <= 20; i++)
-  {
-    add_record_I(i, 55, 55);
-  }
-  
-
- myDataFile = SPIFFS.open(filename, "r");              // Open the file again, this time for reading
-   if (!myDataFile) Serial.println("file open failed");  // Check for errors
-   while (myDataFile.available()) {
-     Serial.write(myDataFile.read());                    // Read all the data from the file and display it
-   }
-   myDataFile.close();   
-   
-  // add_record_I(2, 55, 55);
-  // print_record(0);
-  // // print_record(1);
-  // add_record(2, 22, 33);
-  // // print_record(2);
-  // reload_db();
-  // print_record_I(0);
-  // print_record_I(1);
-  // print_record_I(2);
-
   // Serial.println(select_record(1).time);
-  // load_config();
+  load_config();
   // Serial.println("setup " + String(log_count));
 }
 
@@ -91,15 +54,14 @@ void loop()
   // put your main code here, to run repeatedly:
   // Serial.println("loop " + String(log_count));
 
-  // add_record_I(log_count, analogRead(A0), millis() + select_record(log_count - 1).time);
-  // Serial.println("last rec : " + String(select_record(log_count - 1).id + " " + String(select_record(log_count - 1).sensorValue)) + " " + String(select_record(log_count - 1).time));
-  // log_count++;
-  // if (log_count > TABLE_SIZE)
-  //   log_count = 1;
+  add_record_I(log_count, analogRead(A0), millis() + select_record((log_count) == 1 ? TABLE_SIZE : log_count - 1).time + _1H_IN_US);
+  log_count++;
+  if (log_count > TABLE_SIZE)
+    log_count = 1;
 
-  // update_config();
-  // ESP.deepSleep(_1Sec_IN_US);
-  // delayMicroseconds(_1Sec_IN_US);
+  update_config();
+  ESP.deepSleep(_1H_IN_US);
+  delayMicroseconds(_1Sec_IN_US);
 }
 void load_config()
 {
@@ -124,9 +86,9 @@ void load_config()
 void update_config()
 {
   myDataFile = SPIFFS.open(config_filename, "w+");
-   char clog_count[10];
-   sprintf(clog_count,"%10d",log_count);
-   String slog_count(clog_count);
+  char clog_count[10];
+  sprintf(clog_count, "%10d", log_count);
+  String slog_count(clog_count);
   myDataFile.println("log_count: " + slog_count);
   myDataFile.close();
 }
@@ -154,13 +116,13 @@ void delete_record(uint32_t i)
   char cid[10];
   char csensorValue[5];
   char ctime[10];
-  sprintf(cid,"%10d",0);
+  sprintf(cid, "%10d", 0);
   String sid(cid);
-  sprintf(csensorValue,"%5d",0);
+  sprintf(csensorValue, "%5d", 0);
   String ssensorValue(csensorValue);
-  sprintf(ctime,"%10d",0);
+  sprintf(ctime, "%10d", 0);
   String stime(ctime);
-  myDataFile.println(sid+ char(9) + ssensorValue + char(9) + stime);
+  myDataFile.println(sid + char(9) + ssensorValue + char(9) + stime);
   myDataFile.close();
 }
 void add_record_I(uint32_t i, uint16_t sensorValue, uint32_t time)
@@ -171,13 +133,13 @@ void add_record_I(uint32_t i, uint16_t sensorValue, uint32_t time)
   char cid[10];
   char csensorValue[5];
   char ctime[10];
-  sprintf(cid,"%10d",i);
+  sprintf(cid, "%10d", i);
   String sid(cid);
-  sprintf(csensorValue,"%5d",sensorValue);
+  sprintf(csensorValue, "%5d", sensorValue);
   String ssensorValue(csensorValue);
-  sprintf(ctime,"%10d",time);
+  sprintf(ctime, "%10d", time);
   String stime(ctime);
-  myDataFile.println(sid+ char(9) + ssensorValue + char(9) + stime);
+  myDataFile.println(sid + char(9) + ssensorValue + char(9) + stime);
 
   Serial.println("New Record Added " + String(i) + char(9) + String(sensorValue) + char(9) + String(time));
   myDataFile.close();
@@ -188,13 +150,13 @@ void add_record(uint32_t id, uint16_t sensorValue, uint32_t time)
   char cid[10];
   char csensorValue[5];
   char ctime[10];
-  sprintf(cid,"%10d",id);
+  sprintf(cid, "%10d", id);
   String sid(cid);
-  sprintf(csensorValue,"%5d",sensorValue);
+  sprintf(csensorValue, "%5d", sensorValue);
   String ssensorValue(csensorValue);
-  sprintf(ctime,"%10d",time);
+  sprintf(ctime, "%10d", time);
   String stime(ctime);
-  myDataFile.println(sid+ char(9) + ssensorValue + char(9) + stime);
+  myDataFile.println(sid + char(9) + ssensorValue + char(9) + stime);
   Serial.println("New Record Added " + String(id) + char(9) + String(sensorValue) + char(9) + String(time));
   myDataFile.close();
 }
@@ -207,13 +169,13 @@ void update_record(uint32_t i, uint32_t id, uint16_t sensorValue, uint32_t time)
   char cid[10];
   char csensorValue[5];
   char ctime[10];
-  sprintf(cid,"%10d",id);
+  sprintf(cid, "%10d", id);
   String sid(cid);
-  sprintf(csensorValue,"%5d",sensorValue);
+  sprintf(csensorValue, "%5d", sensorValue);
   String ssensorValue(csensorValue);
-  sprintf(ctime,"%10d",time);
+  sprintf(ctime, "%10d", time);
   String stime(ctime);
-  myDataFile.println(sid+ char(9) + ssensorValue + char(9) + stime);
+  myDataFile.println(sid + char(9) + ssensorValue + char(9) + stime);
 
   Serial.println("Record Updated " + String(id) + char(9) + String(sensorValue) + char(9) + String(time));
   myDataFile.close();
@@ -237,7 +199,7 @@ void reload_db()
 }
 void print_record_I(uint32_t i)
 {
-  Serial.println("record " +String(i)+" "+ String(sensor_data[i].id) + ": " + char(9) + String(sensor_data[i].sensorValue) + char(9) + String(sensor_data[i].time));
+  Serial.println("record " + String(i) + " " + String(sensor_data[i].id) + ": " + char(9) + String(sensor_data[i].sensorValue) + char(9) + String(sensor_data[i].time));
 }
 void print_record(uint32_t i)
 {
@@ -251,11 +213,11 @@ Record select_record(uint32_t i)
   Record r = {0};
   uint32_t read_ahead = myDataFile.parseInt();
   // if(read_ahead!=0){
-    r.id = read_ahead;
-    r.sensorValue = myDataFile.parseInt();
-    r.time = myDataFile.parseInt();
+  r.id = read_ahead;
+  r.sensorValue = myDataFile.parseInt();
+  r.time = myDataFile.parseInt();
   // }
-  
+
   myDataFile.close();
   return r;
 }
