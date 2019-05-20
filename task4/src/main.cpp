@@ -5,7 +5,7 @@ const char *ssid = "Famillia";
 const char *password = "khaledsa14";
 
 int ledPin = D3;
-WiFiServer server(123);
+WiFiServer server(4545);
 
 void setup()
 {
@@ -51,13 +51,28 @@ void loop()
 
   // Match the request
   Serial.println("request: " + req);
+  if (req == "GET / HTTP/1.1")
+  {
+    // Prepare the response
+    String s = "HTTP/1.1 200 OK\r\n";
+    s += "Content-Type: text/html\r\n\r\n";
+    s += "<!DOCTYPE HTML>\r\n<html>\r\n";
+    s += "<br><input type=\"button\" name=\"bl\" value=\"Turn LED ON \" onclick=\"location.href='/ON'\">";
+    s += "<br><br><br>";
+    s += "<br><input type=\"button\" name=\"bl\" value=\"Turn LED OFF\" onclick=\"location.href='/OFF'\">";
+    s += "</html>\n";
 
-  if (req.indexOf("/OFF") != -1)
+    client.flush();
+
+    // Send the response to the client
+    client.print(s);
+  }
+  else if (req.indexOf("/OFF") != -1)
   { //checks if you clicked OFF
     digitalWrite(ledPin, LOW);
     Serial.println("clicked OFF");
   }
-  if (req.indexOf("/ON") != -1)
+  else if (req.indexOf("/ON") != -1)
   { //checks if you clicked ON
     digitalWrite(ledPin, HIGH);
     Serial.println("clicked ON");
@@ -69,18 +84,5 @@ void loop()
     return;
   }
 
-  // Prepare the response
-  String s = "HTTP/1.1 200 OK\r\n";
-  s += "Content-Type: text/html\r\n\r\n";
-  s += "<!DOCTYPE HTML>\r\n<html>\r\n";
-  s += "<br><input type=\"button\" name=\"bl\" value=\"Turn LED ON \" onclick=\"location.href='/ON'\">";
-  s += "<br><br><br>";
-  s += "<br><input type=\"button\" name=\"bl\" value=\"Turn LED OFF\" onclick=\"location.href='/OFF'\">";
-  s += "</html>\n";
-
-  client.flush();
-
-  // Send the response to the client
-  client.print(s);
   delay(1);
 }
