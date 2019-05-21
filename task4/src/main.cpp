@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 
 const char *ssid = "Famillia";
-const char *password = "khaledsa14";
+const char *password = "xx";
 
 int ledPin = D3;
 WiFiServer server(4545);
