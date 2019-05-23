@@ -19,6 +19,10 @@
 		},
 		{
 			"path": "task5"
+		},
+		{
+			"name": "task6",
+			"path": "task6"
 		}
 	],
 	"settings": {
