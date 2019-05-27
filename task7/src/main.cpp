@@ -50,21 +50,21 @@ void loop()
   // put your main code here, to run repeatedly:
   makehttpsRequestReadFeeds();
 
-  if (client.connect(server, 443))
-  {
-    Serial.println("ssl success");
-    // ThingSpeak.setField(1, analogRead(A0));
-    // ThingSpeak.setField(2, String((long)millis()));
-    ThingSpeak.setField(1, caesar_encrypt(String(analogRead(A0))));
-    ThingSpeak.setField(2, caesar_encrypt(String(millis())));
-    ThingSpeak.writeFields(myChannelNumber, myWriteApiKey);
-     delay(20000);
-  }else{
-     Serial.println("ssl failed");
-     delay(100);
-  }
-  add_record_I(FNVHash(millis()), analogRead(A0), millis());
-  delay(20000);
+  // if (client.connect(server, 443))
+  // {
+  //   Serial.println("ssl success");
+  //   // ThingSpeak.setField(1, analogRead(A0));
+  //   // ThingSpeak.setField(2, String((long)millis()));
+  //   ThingSpeak.setField(1, caesar_encrypt(String(analogRead(A0))));
+  //   ThingSpeak.setField(2, caesar_encrypt(String(millis())));
+  //   ThingSpeak.writeFields(myChannelNumber, myWriteApiKey);
+  //    delay(20000);
+  // }else{
+  //    Serial.println("ssl failed");
+  //    delay(100);
+  // }
+  // add_record_I(FNVHash(millis()), analogRead(A0), millis());
+  delay(5000);
 }
  unsigned int FNVHash(int n)
 {
@@ -152,10 +152,10 @@ void makehttpsRequestReadFeeds()
     //parse json
     const size_t bufferSize = 2 * JSON_ARRAY_SIZE(1) + JSON_ARRAY_SIZE(2) + 4 * JSON_OBJECT_SIZE(1) + 3 * JSON_OBJECT_SIZE(2) + 3 * JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(5) + 2 * JSON_OBJECT_SIZE(7) + 2 * JSON_OBJECT_SIZE(8) + 720;
     // long bufferSize= client.readStringUntil('\n').toInt();
-    // bufferSize=bufferSize *JSON_OBJECT_SIZE(1)*1000U+bufferSize *JSON_ARRAY_SIZE(1)*1000U;
+    // bufferSize=bufferSize *JSON_OBJECT_SIZE(1)*10U+bufferSize *JSON_ARRAY_SIZE(1)*10U;
     client.readStringUntil('\n');
     Serial.println(bufferSize);
-    DynamicJsonDocument jsonBuffer(bufferSize * 1000);
+    DynamicJsonDocument jsonBuffer(bufferSize * 4);
 
     // FIND FIELDS IN JSON TREE
     DeserializationError error = deserializeJson(jsonBuffer, client);
