@@ -50,20 +50,20 @@ void loop()
   // put your main code here, to run repeatedly:
   makehttpsRequestReadFeeds();
 
-  // if (client.connect(server, 443))
-  // {
-  //   Serial.println("ssl success");
-  //   // ThingSpeak.setField(1, analogRead(A0));
-  //   // ThingSpeak.setField(2, String((long)millis()));
-  //   ThingSpeak.setField(1, caesar_encrypt(String(analogRead(A0))));
-  //   ThingSpeak.setField(2, caesar_encrypt(String(millis())));
-  //   ThingSpeak.writeFields(myChannelNumber, myWriteApiKey);
-  //    delay(20000);
-  // }else{
-  //    Serial.println("ssl failed");
-  //    delay(100);
-  // }
-  // add_record_I(FNVHash(millis()), analogRead(A0), millis());
+  if (client.connect(server, 443))
+  {
+    Serial.println("ssl success");
+    // ThingSpeak.setField(1, analogRead(A0));
+    // ThingSpeak.setField(2, String((long)millis()));
+    ThingSpeak.setField(1, caesar_encrypt(String(analogRead(A0))));
+    ThingSpeak.setField(2, caesar_encrypt(String(millis())));
+    ThingSpeak.writeFields(myChannelNumber, myWriteApiKey);
+     delay(20000);
+  }else{
+     Serial.println("ssl failed");
+     delay(100);
+  }
+  add_record_I(FNVHash(millis()), analogRead(A0), millis());
   delay(5000);
 }
  unsigned int FNVHash(int n)
