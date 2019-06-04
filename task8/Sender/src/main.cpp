@@ -39,13 +39,12 @@ void setup()
   Serial.println("**************************");
   Serial.println("**************************");
   Serial.println("******** BEGIN ***********");
-  Serial.println("- start DHT sensor");
 
   delay(500);
   Serial.println("- set ESP STA mode");
   WiFi.mode(WIFI_STA);
   Serial.println("- connecting to wifi");
-  // WiFi.config(ip, gateway, subnet);
+  WiFi.config(ip, gateway, subnet);
   WiFi.begin(ssid, password);
   Serial.println("");
   while (WiFi.status() != WL_CONNECTED)
@@ -61,7 +60,7 @@ void setup()
   }
 
   Serial.println("- wifi connected");
-  Serial.println("- read DHT sensor");
+  Serial.println("- read sensor");
   readSensor();
   Serial.println("- build DATA stream string");
   buildDataStream();
