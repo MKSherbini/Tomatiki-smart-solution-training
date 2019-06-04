@@ -4,7 +4,6 @@
 #include <ArduinoJson.h>
 #include "ThingSpeak.h"
 #include <time.h>
-#include <Crypto.h>
 #include "fs_database.h"
 
 const char *ssid = "Famillia";
@@ -50,20 +49,20 @@ void loop()
   // put your main code here, to run repeatedly:
   makehttpsRequestReadFeeds();
 
-  if (client.connect(server, 443))
-  {
-    Serial.println("ssl success");
-    // ThingSpeak.setField(1, analogRead(A0));
-    // ThingSpeak.setField(2, String((long)millis()));
-    ThingSpeak.setField(1, caesar_encrypt(String(analogRead(A0))));
-    ThingSpeak.setField(2, caesar_encrypt(String(millis())));
-    ThingSpeak.writeFields(myChannelNumber, myWriteApiKey);
-     delay(20000);
-  }else{
-     Serial.println("ssl failed");
-     delay(100);
-  }
-  add_record_I(FNVHash(millis()), analogRead(A0), millis());
+  // if (client.connect(server, 443))
+  // {
+  //   Serial.println("ssl success");
+  //   // ThingSpeak.setField(1, analogRead(A0));
+  //   // ThingSpeak.setField(2, String((long)millis()));
+  //   ThingSpeak.setField(1, caesar_encrypt(String(analogRead(A0))));
+  //   ThingSpeak.setField(2, caesar_encrypt(String(millis())));
+  //   ThingSpeak.writeFields(myChannelNumber, myWriteApiKey);
+  //    delay(20000);
+  // }else{
+  //    Serial.println("ssl failed");
+  //    delay(100);
+  // }
+  // add_record_I(FNVHash(millis()), analogRead(A0), millis());
   delay(5000);
 }
  unsigned int FNVHash(int n)
@@ -101,7 +100,9 @@ String caesar_decrypt(String n)
   }
   return s;
 }
+const size_t bufferSize = 2 * JSON_ARRAY_SIZE(1) + JSON_ARRAY_SIZE(2) + 4 * JSON_OBJECT_SIZE(1) + 3 * JSON_OBJECT_SIZE(2) + 3 * JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(5) + 2 * JSON_OBJECT_SIZE(7) + 2 * JSON_OBJECT_SIZE(8) + 720;
 
+ DynamicJsonDocument jsonBuffer(bufferSize);
 void makehttpsRequestReadFeeds()
 {
   // close any connection before send a new request to allow client make connection to server
@@ -150,12 +151,11 @@ void makehttpsRequestReadFeeds()
     }
 
     //parse json
-    const size_t bufferSize = 2 * JSON_ARRAY_SIZE(1) + JSON_ARRAY_SIZE(2) + 4 * JSON_OBJECT_SIZE(1) + 3 * JSON_OBJECT_SIZE(2) + 3 * JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(5) + 2 * JSON_OBJECT_SIZE(7) + 2 * JSON_OBJECT_SIZE(8) + 720;
     // long bufferSize= client.readStringUntil('\n').toInt();
     // bufferSize=bufferSize *JSON_OBJECT_SIZE(1)*10U+bufferSize *JSON_ARRAY_SIZE(1)*10U;
     client.readStringUntil('\n');
     Serial.println(bufferSize);
-    DynamicJsonDocument jsonBuffer(bufferSize * 4);
+    
 
     // FIND FIELDS IN JSON TREE
     DeserializationError error = deserializeJson(jsonBuffer, client);

@@ -26,6 +26,12 @@
 		},
 		{
 			"path": "task7"
+		},
+		{
+			"path": "task8\\AP"
+		},
+		{
+			"path": "task8\\Sender"
 		}
 	],
 	"settings": {
